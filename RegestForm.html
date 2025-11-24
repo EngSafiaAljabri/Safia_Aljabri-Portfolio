@@ -1,0 +1,369 @@
+﻿<!DOCTYPE html>
+<html lang="ar">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>تسجيل ورشة احترف أدوات الذكاء الاصطناعي</title>
+
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&family=Zain:wght@300;400;700&display=swap" rel="stylesheet">
+
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Inter', sans-serif;
+        }
+
+        /* خلفية الصفحة صورة كاملة */
+        body {
+            min-height: 100vh;
+            background-image: url('images/2.jpg'); /* ضع رابط صورتك هنا */
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+            background-attachment: fixed;
+            padding: 0;
+        }
+
+        /* Header */
+        header {
+            width: 100%;
+            height: 200px;
+           /* background-image: url('images/2.jpg');*/
+            background-size: cover;
+            background-position: center;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            position: relative;
+            color: #fff;
+        }
+
+            header::after {
+                content: '';
+                position: absolute;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+                background: rgba(0,0,0,0.4);
+            }
+
+            header h1 {
+                position: relative;
+                font-family: 'Zain', sans-serif;
+                font-size: 2rem;
+                text-align: center;
+                z-index: 1;
+            }
+
+        /* Form container */
+        .form-container {
+            background: rgba(255,255,255,0.85); /* شفافية لرؤية الخلفية */
+            border-radius: 20px;
+            padding: 40px 30px;
+            max-width: 600px;
+            width: 100%;
+            box-shadow: 0 15px 40px rgba(0,0,0,0.3);
+            position: relative;
+            overflow: hidden;
+            margin: -80px auto 40px auto;
+        }
+
+        p.description {
+            text-align: center;
+            color: #555;
+            font-size: 14px;
+            margin-bottom: 30px;
+        }
+
+        form {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        label {
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 5px;
+        }
+
+        input, select, textarea {
+            padding: 12px 15px;
+            border-radius: 10px;
+            border: 1px solid #ccc;
+            font-size: 14px;
+            width: 100%;
+            transition: 0.3s;
+        }
+
+            input:focus, select:focus, textarea:focus {
+                outline: none;
+                border-color: #4a90e2;
+                box-shadow: 0 0 5px rgba(74,144,226,0.4);
+            }
+
+        .error-message {
+            color: #f44336;
+            font-size: 12px;
+            display: none;
+            margin-top: 5px;
+        }
+
+        button {
+            background-color: #ff6b6b;
+            color: #fff;
+            border: none;
+            padding: 15px;
+            border-radius: 50px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+
+            button:hover {
+                background-color: #ff4757;
+                transform: scale(1.05);
+            }
+
+        .success-message {
+            color: #4caf50;
+            font-weight: 600;
+            text-align: center;
+            margin-top: 20px;
+        }
+
+        /* Model Info Panel */
+        #modelInfoBtn {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            z-index: 1000;
+        }
+
+        #modelModal {
+            position: fixed;
+            bottom: 70px;
+            right: 20px;
+            width: 300px;
+            max-width: 90%;
+            background: rgba(255,255,255,0.95);
+            border-radius: 15px;
+            padding: 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+            display: none;
+            animation: bounceIn 0.5s;
+            z-index: 1000;
+        }
+
+            #modelModal::before {
+                content: '';
+                position: absolute;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+                background: radial-gradient(circle, rgba(255,255,255,0.1) 1px, transparent 1px);
+                background-size: 20px 20px;
+                animation: moveParticles 10s linear infinite;
+                z-index: 0;
+            }
+
+            #modelModal > * {
+                position: relative;
+                z-index: 1;
+            }
+
+        @keyframes bounceIn {
+            0% {
+                transform: scale(0.5) translateY(50px);
+                opacity: 0;
+            }
+
+            60% {
+                transform: scale(1.05) translateY(-10px);
+                opacity: 1;
+            }
+
+            80% {
+                transform: scale(0.95) translateY(5px);
+            }
+
+            100% {
+                transform: scale(1) translateY(0);
+            }
+        }
+
+        @keyframes moveParticles {
+            0% {
+                background-position: 0 0;
+            }
+
+            100% {
+                background-position: 100px 100px;
+            }
+        }
+
+        .close-btn {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            font-size: 1.3rem;
+            font-weight: bold;
+            color: #333;
+            cursor: pointer;
+        }
+
+        @media(max-width:600px) {
+            header h1 {
+                font-size: 1.5rem;
+                padding: 0 10px;
+            }
+
+            .form-container {
+                padding: 25px;
+                margin: -60px auto 30px auto;
+            }
+
+            #modelModal {
+                width: 90%;
+                bottom: 80px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <h1>ورشة احترف أدوات الذكاء الاصطناعي</h1>
+    </header>
+
+    <div class="form-container">
+        <p class="description">تقديم المهندسة صفية الجابري</p>
+
+        <form id="registrationForm" novalidate>
+            <div>
+                <label for="fullName">الاسم الكامل</label>
+                <input type="text" id="fullName" name="fullName" placeholder="اكتب اسمك الكامل" required>
+                <div class="error-message">الرجاء إدخال الاسم الكامل</div>
+            </div>
+
+            <div>
+                <label for="email">البريد الإلكتروني</label>
+                <input type="email" id="email" name="email" placeholder="example@email.com" required>
+                <div class="error-message">الرجاء إدخال بريد إلكتروني صالح</div>
+            </div>
+
+            <div>
+                <label for="phone">رقم الهاتف</label>
+                <input type="tel" id="phone" name="phone" placeholder="009689XXXXXXXX" pattern="^[0-9]{8,15}$" required>
+                <div class="error-message">الرجاء إدخال رقم هاتف صالح (8-15 رقم)</div>
+            </div>
+
+            <div>
+                <label for="age">العمر</label>
+                <input type="number" id="age" name="age" placeholder="اكتب عمرك" min="10" max="100" required>
+                <div class="error-message">الرجاء إدخال عمر بين 10 و 100</div>
+            </div>
+
+            <div>
+                <label for="profession">المهنة / التخصص</label>
+                <input type="text" id="profession" name="profession" placeholder="مثال: طالب، مهندس، مدرب" maxlength="50" required>
+                <div class="error-message">الرجاء إدخال المهنة</div>
+            </div>
+
+            <div>
+                <label for="experience">مستوى الخبرة في الذكاء الاصطناعي</label>
+                <select id="experience" name="experience" required>
+                    <option value="">اختر المستوى</option>
+                    <option value="beginner">مبتدئ</option>
+                    <option value="intermediate">متوسط</option>
+                    <option value="advanced">متقدم</option>
+                </select>
+                <div class="error-message">الرجاء اختيار مستوى الخبرة</div>
+            </div>
+
+            <div>
+                <label for="goals">أهدافك من حضور الورشة</label>
+                <textarea id="goals" name="goals" rows="4" maxlength="250" placeholder="اكتب ما تريد تحقيقه..." required></textarea>
+                <div class="error-message">الرجاء كتابة الأهداف</div>
+            </div>
+
+            <button type="submit">تسجيل الآن</button>
+            <div class="success-message" id="successMsg"></div>
+        </form>
+    </div>
+
+    <!-- Model Info Button -->
+    <button id="modelInfoBtn">Model Info</button>
+
+    <!-- Model Info Panel -->
+    <div id="modelModal">
+        <span class="close-btn">&times;</span>
+        <h3>Model Information</h3>
+        <ul>
+            <li><strong>Features:</strong> Fast registration, interactive validation, responsive design.</li>
+            <li><strong>Strengths:</strong> Professional design, user-friendly, mobile & desktop compatible.</li>
+            <li><strong>Weaknesses:</strong> Currently no backend storage, limited analytics.</li>
+            <li><strong>Future Plans:</strong> Save data to database, add email/WhatsApp confirmation, multi-language support, progress tracking.</li>
+        </ul>
+    </div>
+
+    <script>
+        // Form Validation & Submission
+        const form = document.getElementById('registrationForm');
+        const successMsg = document.getElementById('successMsg');
+
+        form.addEventListener('submit', function (e) {
+            e.preventDefault();
+            let isValid = true;
+
+            const fields = [
+                { id: 'fullName', validator: val => val.trim() !== '' },
+                { id: 'email', validator: val => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(val) },
+                { id: 'phone', validator: val => /^[0-9]{8,15}$/.test(val) },
+                { id: 'age', validator: val => val >= 10 && val <= 100 },
+                { id: 'profession', validator: val => val.trim() !== '' },
+                { id: 'experience', validator: val => val !== '' },
+                { id: 'goals', validator: val => val.trim() !== '' }
+            ];
+
+            fields.forEach(f => {
+                const input = document.getElementById(f.id);
+                const error = input.nextElementSibling;
+                if (!f.validator(input.value)) {
+                    error.style.display = 'block';
+                    isValid = false;
+                } else {
+                    error.style.display = 'none';
+                }
+            });
+
+            if (isValid) {
+                const formData = Object.fromEntries(new FormData(form).entries());
+                console.log("Submitted Data:", formData);
+
+                successMsg.textContent = `تم التسجيل بنجاح! شكراً لك ${formData.fullName}`;
+                form.reset();
+
+                setTimeout(() => { successMsg.textContent = ''; }, 5000);
+            }
+        });
+
+        // Model Info Panel
+        const infoBtn = document.getElementById('modelInfoBtn');
+        const modal = document.getElementById('modelModal');
+        const closeBtn = document.querySelector('.close-btn');
+
+        infoBtn.addEventListener('click', () => { modal.style.display = 'block'; });
+        closeBtn.addEventListener('click', () => { modal.style.display = 'none'; });
+        window.addEventListener('click', (e) => { if (e.target === modal) modal.style.display = 'none'; });
+    </script>
+
+</body>
+</html>

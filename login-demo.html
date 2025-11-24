@@ -1,0 +1,344 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Creative Login Demo</title>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Roboto', sans-serif;
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background: linear-gradient(135deg, #6CC1FF, #3A8DFF);
+            overflow: hidden;
+        }
+
+        /* Floating animated circles */
+        .circle {
+            position: absolute;
+            border-radius: 50%;
+            background: rgba(255,255,255,0.15);
+            animation: float 8s ease-in-out infinite;
+        }
+
+            .circle:nth-child(1) {
+                width: 120px;
+                height: 120px;
+                top: 10%;
+                left: 5%;
+                animation-delay: 0s;
+            }
+
+            .circle:nth-child(2) {
+                width: 200px;
+                height: 200px;
+                top: 50%;
+                left: 70%;
+                animation-delay: 2s;
+            }
+
+            .circle:nth-child(3) {
+                width: 80px;
+                height: 80px;
+                top: 80%;
+                left: 40%;
+                animation-delay: 4s;
+            }
+
+        @keyframes float {
+            0%,100% {
+                transform: translateY(0) rotate(0deg);
+            }
+
+            50% {
+                transform: translateY(-30px) rotate(45deg);
+            }
+        }
+
+        /* Login container */
+        .login-container {
+            background: #fff;
+            width: 360px;
+            padding: 50px;
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.2);
+            position: relative;
+            z-index: 1;
+        }
+
+            .login-container h2 {
+                text-align: center;
+                margin-bottom: 30px;
+                color: #333;
+            }
+
+        .input-group {
+            position: relative;
+            margin-bottom: 25px;
+        }
+
+            .input-group input {
+                width: 100%;
+                padding: 12px 45px;
+                border-radius: 50px;
+                border: 1px solid #ccc;
+                outline: none;
+                transition: all 0.3s ease;
+                font-size: 15px;
+            }
+
+                .input-group input:focus {
+                    border-color: #3A8DFF;
+                    box-shadow: 0 0 8px rgba(58,141,255,0.5);
+                }
+
+            .input-group i {
+                position: absolute;
+                top: 50%;
+                left: 15px;
+                transform: translateY(-50%);
+                color: #3A8DFF;
+                transition: 0.3s;
+            }
+
+        .login-btn {
+            width: 100%;
+            padding: 12px;
+            border-radius: 50px;
+            border: none;
+            background: #3A8DFF;
+            color: white;
+            font-size: 16px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+            .login-btn:hover {
+                background: #6CC1FF;
+                transform: translateY(-3px);
+                box-shadow: 0 8px 15px rgba(0,0,0,0.2);
+            }
+
+        .forgot-link {
+            display: block;
+            text-align: center;
+            margin-top: 15px;
+            font-size: 14px;
+            color: #3A8DFF;
+            text-decoration: none;
+            transition: 0.3s;
+        }
+
+            .forgot-link:hover {
+                text-decoration: underline;
+                color: #6CC1FF;
+            }
+
+        /* Toast notifications */
+        .toast {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: #333;
+            color: white;
+            padding: 15px 20px;
+            border-radius: 10px;
+            opacity: 0;
+            pointer-events: none;
+            transition: all 0.5s;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 14px;
+            z-index: 1000;
+        }
+
+            .toast.show {
+                opacity: 1;
+                pointer-events: auto;
+            }
+
+            .toast.success {
+                background: #28a745;
+            }
+
+            .toast.error {
+                background: #dc3545;
+            }
+
+        /* Modal */
+        #infoModal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.6);
+            justify-content: center;
+            align-items: center;
+            z-index: 2000;
+        }
+
+        #infoModalContent {
+            background: white;
+            padding: 30px;
+            border-radius: 15px;
+            width: 90%;
+            max-width: 500px;
+            position: relative;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.3);
+            animation: fadeIn 0.4s ease;
+            color: #555;
+            line-height: 1.6;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: scale(0.9);
+            }
+
+            to {
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
+
+        #closeModal {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            border: none;
+            background: #dc3545;
+            color: white;
+            border-radius: 50%;
+            width: 30px;
+            height: 30px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+
+        #infoBtn {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: #3A8DFF;
+            color: white;
+            border: none;
+            border-radius: 50px;
+            padding: 12px 20px;
+            cursor: pointer;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+            font-weight: bold;
+            transition: all 0.3s;
+            z-index: 1500;
+        }
+
+            #infoBtn:hover {
+                background: #6CC1FF;
+                transform: translateY(-3px);
+            }
+    </style>
+</head>
+<body>
+
+    <!-- Animated circles -->
+    <div class="circle"></div>
+    <div class="circle"></div>
+    <div class="circle"></div>
+
+    <!-- Login Form -->
+    <div class="login-container">
+        <h2>Login</h2>
+        <div class="input-group">
+            <i class="fas fa-envelope"></i>
+            <input type="email" id="email" placeholder="Email">
+        </div>
+        <div class="input-group">
+            <i class="fas fa-lock"></i>
+            <input type="password" id="password" placeholder="Password">
+        </div>
+        <button class="login-btn" onclick="validateForm()">Sign In</button>
+        <a href="#" class="forgot-link">Forgot Password?</a>
+    </div>
+
+    <!-- Toast notification -->
+    <div id="toast" class="toast"></div>
+
+    <!-- Info Button and Modal -->
+    <button id="infoBtn">Model Info</button>
+    <div id="infoModal">
+        <div id="infoModalContent">
+            <h2 style="text-align:center; margin-bottom:20px; color:#333;">Model Info</h2>
+            <ul style="list-style:none; padding-left:0;">
+                <li>✅ <strong>Pros:</strong> Creative animated design, responsive layout, interactive validation, toast notifications.</li>
+                <li>⚠️ <strong>Cons:</strong> No backend integration, validation is front-end only, static user feedback.</li>
+                <li>🔍 <strong>Validation Type:</strong> Email format check, password min length (6 chars), required fields.</li>
+                <li>📱 <strong>Responsive:</strong> Fully flexible on all screen sizes, including mobile, tablet, desktop.</li>
+            </ul>
+            <button id="closeModal">×</button>
+        </div>
+    </div>
+
+    <script>
+        // Toast function
+        function showToast(message, type) {
+            const toast = document.getElementById('toast');
+            toast.textContent = '';
+            const icon = document.createElement('i');
+            icon.className = type === 'success' ? 'fas fa-check-circle' : 'fas fa-exclamation-circle';
+            toast.appendChild(icon);
+            const text = document.createTextNode(' ' + message);
+            toast.appendChild(text);
+            toast.className = 'toast show ' + type;
+            setTimeout(() => { toast.className = 'toast'; }, 3000);
+        }
+
+        // Form validation
+        function validateForm() {
+            const email = document.getElementById('email').value.trim();
+            const password = document.getElementById('password').value.trim();
+            const emailPattern = /^[^ ]+@[^ ]+\.[a-z]{2,3}$/;
+
+            if (email === '' || password === '') {
+                showToast('All fields are required!', 'error');
+                return false;
+            }
+            if (!emailPattern.test(email)) {
+                showToast('Invalid email format!', 'error');
+                return false;
+            }
+            if (password.length < 6) {
+                showToast('Password must be at least 6 characters!', 'error');
+                return false;
+            }
+
+            showToast('Login successful!', 'success');
+            return true;
+        }
+
+        // Modal JS
+        const infoBtn = document.getElementById('infoBtn');
+        const infoModal = document.getElementById('infoModal');
+        const closeModal = document.getElementById('closeModal');
+
+        infoBtn.addEventListener('click', () => { infoModal.style.display = 'flex'; });
+        closeModal.addEventListener('click', () => { infoModal.style.display = 'none'; });
+        window.addEventListener('click', (e) => {
+            if (e.target == infoModal) infoModal.style.display = 'none';
+        });
+    </script>
+
+</body>
+</html>

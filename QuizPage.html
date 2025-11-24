@@ -1,0 +1,337 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Interactive Coding Quiz</title>
+
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&family=Zain:wght@300;400;700&display=swap" rel="stylesheet">
+
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Inter', sans-serif;
+        }
+
+        body {
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+            background: linear-gradient(270deg, #4a90e2, #50e3c2, #9013fe, #f5a623);
+            background-size: 800% 800%;
+            animation: gradientBG 20s ease infinite;
+        }
+
+        @keyframes gradientBG {
+            0% {
+                background-position: 0% 50%;
+            }
+
+            50% {
+                background-position: 100% 50%;
+            }
+
+            100% {
+                background-position: 0% 50%;
+            }
+        }
+
+        .quiz-container {
+            background: rgba(255,255,255,0.95);
+            border-radius: 15px;
+            padding: 30px 40px;
+            width: 100%;
+            max-width: 600px;
+            box-shadow: 0 15px 40px rgba(0,0,0,0.3);
+            text-align: center;
+            position: relative;
+        }
+
+        h1 {
+            font-family: 'Zain', sans-serif;
+            margin-bottom: 20px;
+            color: #333;
+        }
+
+        .timer {
+            font-size: 1.1rem;
+            font-weight: bold;
+            color: #ff4757;
+            margin-bottom: 15px;
+        }
+
+        .question {
+            font-size: 1.3rem;
+            margin-bottom: 20px;
+            color: #333;
+        }
+
+        .options {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .option {
+            background: #f5f5f5;
+            padding: 12px 20px;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: 0.3s;
+            border: 2px solid transparent;
+            font-weight: 500;
+        }
+
+            .option:hover {
+                transform: scale(1.05);
+            }
+
+            .option.correct {
+                background-color: #4caf50;
+                color: #fff;
+                border-color: #4caf50;
+            }
+
+            .option.wrong {
+                background-color: #f44336;
+                color: #fff;
+                border-color: #f44336;
+            }
+
+        .next-btn, .info-btn {
+            background-color: #ff6b6b;
+            color: #fff;
+            border: none;
+            padding: 12px 30px;
+            border-radius: 50px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: 0.3s;
+            margin-top: 10px;
+        }
+
+            .next-btn:hover, .info-btn:hover {
+                background-color: #ff4757;
+                transform: scale(1.05);
+            }
+
+        .result {
+            font-size: 1.3rem;
+            font-weight: 600;
+            color: #333;
+        }
+
+        /* Bottom-right model info panel */
+        #modelModal {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            width: 300px;
+            max-width: 90%;
+            background: rgba(255,255,255,0.95);
+            border-radius: 15px;
+            padding: 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+            display: none;
+            animation: bounceIn 0.5s;
+            z-index: 1000;
+            overflow: hidden;
+        }
+
+        /* Bounce animation */
+        @keyframes bounceIn {
+            0% {
+                transform: scale(0.5) translateY(50px);
+                opacity: 0;
+            }
+
+            60% {
+                transform: scale(1.05) translateY(-10px);
+                opacity: 1;
+            }
+
+            80% {
+                transform: scale(0.95) translateY(5px);
+            }
+
+            100% {
+                transform: scale(1) translateY(0);
+            }
+        }
+
+        /* Particle background */
+        #modelModal::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: radial-gradient(circle, rgba(255,255,255,0.1) 1px, transparent 1px);
+            background-size: 20px 20px;
+            animation: moveParticles 10s linear infinite;
+            z-index: 0;
+        }
+
+        #modelModal > * {
+            position: relative;
+            z-index: 1;
+        }
+        /* content above particles */
+
+        @keyframes moveParticles {
+            0% {
+                background-position: 0 0;
+            }
+
+            100% {
+                background-position: 100px 100px;
+            }
+        }
+
+        .close-btn {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            font-size: 1.3rem;
+            font-weight: bold;
+            color: #333;
+            cursor: pointer;
+        }
+
+        @media(max-width:600px) {
+            .quiz-container {
+                padding: 20px;
+            }
+
+            h1 {
+                font-size: 1.5rem;
+            }
+
+            .question {
+                font-size: 1.1rem;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="quiz-container">
+        <h1>Quick Coding Quiz</h1>
+        <div class="timer" id="timer">Time Left: 15</div>
+        <div id="quiz"></div>
+        <button id="nextBtn" class="next-btn" style="display:none;">Next Question</button>
+        <button id="infoBtn" class="info-btn">Model Info</button>
+    </div>
+
+    <!-- Bottom-right modal -->
+    <div id="modelModal">
+        <span class="close-btn">&times;</span>
+        <h3>Model Information</h3>
+        <ul>
+            <li><strong>Features:</strong> Fast, interactive, timer-enabled, supports coding questions.</li>
+            <li><strong>Weaknesses:</strong> Limited number of questions, does not save results to server.</li>
+            <li><strong>Responsive:</strong> Works on all screen sizes, mobile-friendly.</li>
+            <li><strong>Validation:</strong> Only one answer selectable, shows correct answer on timeout or wrong choice.</li>
+            <li><strong>Evaluation Suggestions:</strong> Add user login, save results, provide statistical analysis.</li>
+            <li><strong>Additional Info:</strong> Animated background, advanced CSS effects, visually attractive, great for learning coding interactively.</li>
+        </ul>
+    </div>
+
+    <script>
+        const quizData = [
+            { question: "Which language is primarily used for web page structure?", options: ["Python", "HTML", "C#", "Java"], answer: 1 },
+            { question: "What does CSS stand for?", options: ["Cascading Style Sheets", "Computer Style Sheets", "Creative Style Syntax", "Control Style Sheet"], answer: 0 },
+            { question: "Which data type represents true/false values?", options: ["String", "Boolean", "Integer", "Float"], answer: 1 },
+            { question: "Which JavaScript method adds an element to the end of an array?", options: ["push()", "pop()", "shift()", "unshift()"], answer: 0 },
+            { question: "Which language is commonly used for Android app development?", options: ["Swift", "Kotlin", "Ruby", "PHP"], answer: 1 },
+            { question: "Which HTML tag is used for a hyperlink?", options: ["<a>", "<link>", "<href>", "<hyper>"], answer: 0 },
+            { question: "In Python, which keyword defines a function?", options: ["func", "def", "function", "lambda"], answer: 1 },
+            { question: "Which JavaScript symbol is used for strict equality?", options: ["==", "===", "=", "!=="], answer: 1 },
+            { question: "Which property in CSS changes text color?", options: ["background-color", "font-color", "color", "text-color"], answer: 2 },
+            { question: "Which operator is used for addition in most programming languages?", options: ["+", "-", "*", "/"], answer: 0 }
+        ];
+
+        let currentQuestion = 0, score = 0, timeLeft = 15, timerInterval;
+        const quizEl = document.getElementById('quiz');
+        const nextBtn = document.getElementById('nextBtn');
+        const timerEl = document.getElementById('timer');
+        const infoBtn = document.getElementById('infoBtn');
+        const modal = document.getElementById('modelModal');
+        const closeBtn = document.querySelector('.close-btn');
+
+        function startTimer() {
+            clearInterval(timerInterval);
+            timeLeft = 15;
+            timerEl.textContent = `Time Left: ${timeLeft}`;
+            timerInterval = setInterval(() => {
+                timeLeft--;
+                timerEl.textContent = `Time Left: ${timeLeft}`;
+                if (timeLeft <= 0) {
+                    clearInterval(timerInterval);
+                    showCorrectAnswer();
+                    nextBtn.style.display = 'inline-block';
+                }
+            }, 1000);
+        }
+
+        function loadQuestion() {
+            startTimer();
+            const q = quizData[currentQuestion];
+            quizEl.innerHTML = `
+            <div class="question">${q.question}</div>
+            <div class="options">
+                ${q.options.map((opt, index) => `<div class="option" data-index="${index}">${opt}</div>`).join('')}
+            </div>
+        `;
+            document.querySelectorAll('.option').forEach(opt => opt.addEventListener('click', selectOption));
+            nextBtn.style.display = 'none';
+        }
+
+        function showCorrectAnswer() {
+            const correctIndex = quizData[currentQuestion].answer;
+            document.querySelector(`.option[data-index="${correctIndex}"]`).classList.add('correct');
+        }
+
+        function selectOption(e) {
+            clearInterval(timerInterval);
+            const selected = e.target;
+            const selectedIndex = parseInt(selected.dataset.index);
+            const correctIndex = quizData[currentQuestion].answer;
+            document.querySelectorAll('.option').forEach(opt => opt.removeEventListener('click', selectOption));
+            if (selectedIndex === correctIndex) { selected.classList.add('correct'); score++; }
+            else { selected.classList.add('wrong'); showCorrectAnswer(); }
+            nextBtn.style.display = 'inline-block';
+        }
+
+        nextBtn.addEventListener('click', () => {
+            currentQuestion++;
+            if (currentQuestion < quizData.length) loadQuestion();
+            else showResult();
+        });
+
+        function showResult() {
+            clearInterval(timerInterval);
+            quizEl.innerHTML = `<div class="result">You scored ${score} out of ${quizData.length}! 🎉</div>`;
+            nextBtn.style.display = 'none';
+            timerEl.style.display = 'none';
+        }
+
+        // Model Info
+        infoBtn.addEventListener('click', () => { modal.style.display = 'block'; });
+        closeBtn.addEventListener('click', () => { modal.style.display = 'none'; });
+        window.addEventListener('click', (e) => { if (e.target === modal) modal.style.display = 'none'; });
+
+        // Load first question
+        loadQuestion();
+    </script>
+</body>
+</html>
