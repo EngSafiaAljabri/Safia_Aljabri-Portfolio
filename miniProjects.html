@@ -1022,40 +1022,41 @@
 
     <main class="container">
 
-        <h1>معرض النماذج البرمجية المصغرة</h1>
+          <h1>معرض النماذج البرمجية المصغرة</h1>
 
-        <div class="projects-grid">
-            <div class="project-card" data-img="images/login.jpg" onclick="loadProject('login-demo.html')">
-                <div class="project-title">نموذج صفحة تسجيل دخول</div>
-                <div class="project-desc">تصميم بسيط يعرض واجهة دخول المستخدم</div>
-            </div>
+   <div class="projects-grid">
+       <div class="project-card" data-img="images/login.jpg" onclick="loadProject('login-demo.html')">
+           <div class="project-title">نموذج صفحة تسجيل دخول</div>
+           <div class="project-desc">تصميم بسيط يعرض واجهة دخول المستخدم</div>
+       </div>
 
-            <div class="project-card" data-img="images/dash.jpg" onclick="loadProject('HrDashboard .html')">
-                <div class="project-title">نموذج لوحة تحكم</div>
-                <div class="project-desc">تصميم لوحة تحكم مبسطه لقسم الموارد البشرية</div>
-            </div>
+       <div class="project-card" data-img="images/dash.jpg" onclick="loadProject('HrDashboard.html')">
+           <div class="project-title">نموذج لوحة تحكم</div>
+           <div class="project-desc">تصميم لوحة تحكم مبسطه لقسم الموارد البشرية</div>
+       </div>
 
-            <div class="project-card" data-img="images/Quiz.jpg" onclick="loadProject('QuizPage.html')">
-                <div class="project-title">نموذج  صفحة اختبار مصغر</div>
-                <div class="project-desc">صفحة اختبار برمجي  20 سؤال</div>
-            </div>
-            <div class="project-card" data-img="images/Registration.jpg" onclick="loadProject('RegestForm.html')">
-                <div class="project-title">نموذج نموذج تسجيل</div>
-                <div class="project-desc">صفحة تسجيل لورشة</div>
-            </div>
-        </div>
+       <div class="project-card" data-img="images/Quiz.jpg" onclick="loadProject('QuizPage.html')">
+           <div class="project-title">نموذج  صفحة اختبار مصغر</div>
+           <div class="project-desc">صفحة اختبار برمجي 20 سؤال</div>
+       </div>
 
+       <div class="project-card" data-img="images/Registration.jpg" onclick="loadProject('RegestForm.html')">
+           <div class="project-title">نموذج نموذج تسجيل</div>
+           <div class="project-desc">صفحة تسجيل لورشة</div>
+       </div>
+   </div>
 
-        <iframe id="viewer" src=""></iframe>
+   <iframe id="viewer" src=""></iframe>
 
-        <script>
-            function loadProject(url) {
-                document.getElementById('viewer').src = url;
-            }
-        </script>
+   <script>
+       function loadProject(url) {
+           const viewer = document.getElementById('viewer');
+           viewer.src = url;
 
-
-
+           // 🔽 التنقل المباشر إلى iframe
+           viewer.scrollIntoView({ behavior: 'smooth', block: 'start' });
+       }
+   </script>
 
 
 
@@ -1092,3 +1093,4 @@
 
 
 </html>>
+
