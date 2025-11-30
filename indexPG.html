@@ -1,0 +1,766 @@
+﻿<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>لوحة متابعة طلاب الدراسات العليا</title>
+
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&family=Zain:wght@300;400;700&display=swap" rel="stylesheet">
+
+    <!-- jsPDF -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+
+    <style>
+        /* ===== Reset & Fonts ===== */
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Zain', 'Inter', sans-serif;
+        }
+
+        body {
+            background: #f5f6fa;
+            color: #333;
+            transition: background 0.3s, color 0.3s;
+        }
+
+        /* ===== Banner ===== */
+        .banner {
+            width: 100%;
+            overflow: hidden;
+            background: #0097e6;
+            color: white;
+            padding: 10px 0;
+            position: fixed;
+            top: 0;
+            left: 0;
+            z-index: 100;
+            display: flex;
+            align-items: center;
+        }
+
+        .banner-slide {
+            display: inline-block;
+            white-space: nowrap;
+            padding: 0 80px;
+            animation: scrollBanner 20s linear infinite;
+            align-items: center;
+        }
+
+        .banner-slide img {
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            object-fit: cover;
+            margin-left: 10px;
+        }
+
+        @keyframes scrollBanner {
+            0% { transform: translateX(100%); }
+            100% { transform: translateX(-100%); }
+        }
+
+        /* ===== Layout ===== */
+        .container {
+            display: flex;
+            min-height: 100vh;
+            padding-top: 50px;
+        }
+
+        .sidebar {
+            width: 220px;
+            background: #0052cc;
+            color: white;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            position: fixed;
+            height: 100%;
+            top: 50px;
+            right: 0;
+        }
+
+        .sidebar img.logo {
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            object-fit: cover;
+            margin: 0 auto 20px;
+            display: block;
+            border: 3px solid #fff;
+        }
+
+        .sidebar button {
+            background: none;
+            border: none;
+            color: white;
+            padding: 10px;
+            text-align: right;
+            cursor: pointer;
+            border-radius: 5px;
+            transition: 0.3s;
+            font-size: 16px;
+        }
+
+        .sidebar button:hover, .sidebar button.active {
+            background: #003d99;
+        }
+
+        .main {
+            flex: 1;
+            margin-right: 220px;
+            padding: 20px;
+            overflow-y: auto;
+            display: flex;
+            gap: 20px;
+            flex-direction: row-reverse;
+        }
+
+        .home-sidebar {
+            width: 200px;
+            background: #f1f2f6;
+            padding: 15px;
+            border-radius: 8px;
+            flex-shrink: 0;
+        }
+
+        .home-sidebar h3 {
+            margin-bottom: 10px;
+        }
+
+        .home-sidebar .stats {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+
+        .home-sidebar .stat-card {
+            background: #0097e6;
+            color: white;
+            padding: 8px;
+            border-radius: 5px;
+            text-align: center;
+            font-weight: 600;
+        }
+
+        #darkModeToggle {
+            padding: 8px;
+            border: none;
+            border-radius: 5px;
+            background: #003d99;
+            color: white;
+            cursor: pointer;
+            width: 100%;
+            margin-top: 10px;
+        }
+
+        /* ===== Sections & Cards ===== */
+        .content-area {
+            flex: 1;
+        }
+
+        section {
+            display: none;
+            animation: fadeIn 0.5s;
+        }
+
+        section.active { display: block; }
+
+        .card {
+            background: white;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 6px 15px rgba(0,0,0,0.2);
+        }
+
+        .card img {
+            width: 100%;
+            height: auto;
+            object-fit: cover;
+            border-radius: 8px;
+            margin-bottom: 10px;
+        }
+
+        input, select {
+            padding: 8px;
+            margin-left: 5px;
+            border-radius: 5px;
+            border: 1px solid #ccc;
+        }
+
+        button.add-btn, button.pdf-btn, .edit-btn, .delete-btn {
+            border-radius: 5px;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+
+        button.add-btn { padding: 8px 12px; background: #0097e6; color: white; border: none; }
+        button.add-btn:hover { background: #0077cc; }
+
+        button.edit-btn { padding: 4px 8px; background: #e1b12c; color: white; border: none; margin-left: 5px; }
+        button.edit-btn:hover { background: #c39e1d; }
+
+        button.delete-btn { padding: 4px 8px; background: #e84118; color: white; border: none; }
+        button.delete-btn:hover { background: #c23616; }
+
+        button.pdf-btn { padding: 6px 12px; background: #0097e6; color: white; border: none; width: 100%; margin-top: 10px; }
+        button.pdf-btn:hover { background: #0077cc; }
+
+        /* ===== Toast ===== */
+        .toast {
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #44bd32;
+            color: white;
+            padding: 10px 20px;
+            border-radius: 5px;
+            opacity: 0;
+            pointer-events: none;
+            transition: 0.5s;
+        }
+
+        .toast.show {
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        /* ===== Badges ===== */
+        .badge {
+            padding: 3px 7px;
+            border-radius: 5px;
+            color: white;
+            font-size: 12px;
+        }
+
+        .badge.ready { background: #44bd32; }
+        .badge.preparing { background: #ffc107; color:#000; }
+
+        /* ===== Animations ===== */
+        @keyframes fadeIn { from {opacity:0;} to {opacity:1;} }
+
+        /* ===== Dark Mode ===== */
+        body.dark-mode { background: #2f3640; color: white; }
+        body.dark-mode .card { background: #57606f; color: white; }
+        body.dark-mode .home-sidebar { background: #404b5a; }
+        body.dark-mode .stat-card { background: #0097e6; }
+        body.dark-mode .calendar { background: #2f3640; color: white; }
+
+        /* ===== Events Styles ===== */
+        #eventsCards {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+        }
+
+        .event-card {
+            border: 1px solid #ccc;
+            border-radius: 8px;
+            padding: 15px;
+            text-align: center;
+            background-color: #f9f9f9;
+            transition: transform 0.2s;
+        }
+
+        .event-card img {
+            width: 100%;
+            height: 160px;
+            object-fit: cover;
+            border-radius: 8px;
+        }
+
+        /* ===== Calendar Fix ===== */
+        .calendar-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+
+            .calendar-header button {
+                padding: 6px 12px;
+                background: #0097e6;
+                border: none;
+                color: white;
+                font-size: 16px;
+                border-radius: 5px;
+                cursor: pointer;
+                transition: 0.3s;
+            }
+
+                .calendar-header button:hover {
+                    background: #0077cc;
+                }
+
+        .calendar-grid {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 10px;
+        }
+
+        .day {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 50px;
+            border-radius: 50%;
+            background: #f1f2f6;
+            color: #333;
+            font-weight: 600;
+            position: relative;
+            cursor: pointer;
+            transition: transform 0.2s, background 0.3s;
+        }
+
+            .day:hover {
+                transform: scale(1.1);
+                background: #0097e6;
+                color: white;
+            }
+
+            .day.today {
+                background: #fbc531;
+                color: #2f3640;
+                box-shadow: 0 0 10px #fbc531;
+            }
+
+        .day-name {
+            text-align: center;
+            font-weight: bold;
+            color: #0097e6;
+            margin-bottom: 5px;
+        }
+
+        /* نقاط الأحداث على اليوم */
+        .event-dot {
+            position: absolute;
+            bottom: 4px;
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+        }
+
+        .ready {
+            background-color: #28a745;
+        }
+
+        .preparing {
+            background-color: #ffc107;
+        }
+
+        /* Popup */
+        .popup {
+            display: none;
+            position: fixed;
+            z-index: 200;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            background-color: rgba(0,0,0,0.5);
+        }
+
+        .popup-content {
+            background: white;
+            margin: 15% auto;
+            padding: 20px;
+            border-radius: 8px;
+            width: 300px;
+            position: relative;
+        }
+
+        #closePopup {
+            position: absolute;
+            top: 5px;
+            right: 10px;
+            font-size: 24px;
+            cursor: pointer;
+        }
+
+        #eventsList li {
+            margin-bottom: 5px;
+            font-weight: 600;
+        }
+
+    </style>
+</head>
+<body>
+
+    <!-- Banner -->
+    <div class="banner">
+        <div class="banner-slide"><img src="images/logosu.png" alt="شعار الجامعة"> ورشة أساسيات HTML</div>
+        <div class="banner-slide"><img src="images/logosu.png" alt="شعار الجامعة"> ورشة تنسيق الصفحات باستخدام CSS</div>
+        <div class="banner-slide"><img src="images/logosu.png" alt="شعار الجامعة"> مقدمة في JavaScript</div>
+        <div class="banner-slide"><img src="images/logosu.png" alt="شعار الجامعة"> تصميم مواقع متجاوبة</div>
+        <div class="banner-slide"><img src="images/logosu.png" alt="شعار الجامعة"> ورشة Git و GitHub للمبتدئين</div>
+        <div class="banner-slide"><img src="images/logosu.png" alt="شعار الجامعة"> ورشة مبادئ UI / UX</div>
+    </div>
+
+    <div class="container">
+        <!-- Sidebar -->
+        <div class="sidebar">
+            <img class="logo" src="images/logosu.png" alt="شعار الجامعة">
+            <button class="active" onclick="showSection(event,'home')">الرئيسية</button>
+            <button onclick="showSection(event,'students')">طلاب الدراسات العليا</button>
+            <button onclick="showSection(event,'documents')">الأرشيف</button>
+            <button onclick="showSection(event,'events')">الفعاليات</button>
+            <button onclick="showSection(event,'hse')">ملاحظات HSE</button>
+        </div>
+
+        <!-- Main Content -->
+        <div class="main">
+            <div class="home-sidebar">
+                <div class="stats">
+                    <div class="stat-card">عدد الطلاب: 12</div>
+                    <div class="stat-card">عدد الملفات: 25</div>
+                    <div class="stat-card">الفعاليات القادمة: 3</div>
+                </div>
+                <button id="darkModeToggle">Dark Mode</button>
+            </div>
+
+            <div class="content-area">
+                <!-- Home Section -->
+                <section id="home" class="active">
+                    <div class="card">
+                        <img src="images/sucover.jpg" alt="شعار الجامعة">
+                        <h2>مرحباً بكم في قسم الدراسات العليا</h2>
+                        <p>يهدف مركز الدراسات العليا إلى دعم الطلاب في جميع مراحل إعداد أطروحاتهم البحثية من اقتراح الموضوع إلى التسليم النهائي. يمكن للطلاب والمشرفين متابعة التقدم، إدارة الملفات، حضور الفعاليات، وتسجيل الملاحظات المتعلقة بالسلامة والصحة المهنية.</p>
+                    </div>
+                    <div class="calendar-header">
+                        <button id="prevMonth">&lt;</button>
+                        <h3 id="monthYear"></h3>
+                        <button id="nextMonth">&gt;</button>
+                    </div>
+                    <div id="calendarContainer" class="calendar-grid"></div>
+
+                    <!-- نافذة الأحداث اليومية -->
+                    <div id="dayEventsPopup" class="popup">
+                        <div class="popup-content">
+                            <span id="closePopup">&times;</span>
+                            <h4 id="popupDate"></h4>
+                            <ul id="eventsList"></ul>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Students Section -->
+                <section id="students">
+                    <h2>لوحة متابعة الطلاب</h2>
+                    <button class="pdf-btn" onclick="exportSectionPDF('studentCards','Students')">تصدير PDF</button>
+                    <div id="studentCards"></div>
+                    <div class="card">
+                        <h3>إضافة طالب جديد</h3>
+                        <input type="text" id="studentName" placeholder="اسم الطالب">
+                        <select id="studentProgram"><option value="CS">CS</option><option value="IT">IT</option></select>
+                        <select id="studentType"><option value="New">جديد</option><option value="Transfer">منقول</option></select>
+                        <button class="add-btn" onclick="addStudent()">إضافة</button>
+                    </div>
+                </section>
+
+                <!-- Documents Section -->
+                <section id="documents">
+                    <h2>الأرشيف</h2>
+                    <button class="pdf-btn" onclick="exportSectionPDF('docCards','Documents')">تصدير PDF</button><br>
+                    <input type="text" id="searchDoc" placeholder="ابحث هنا">
+                    <input type="file" id="fileInput">
+                    <select id="programSelect"><option value="CS">CS</option><option value="IT">IT</option></select>
+                    <div id="docCards"></div>
+                </section>
+
+                <!-- Events Section -->
+                <section id="events">
+                    <h2>الفعاليات / ورش العمل</h2>
+                    <button class="pdf-btn" onclick="exportSectionPDF('eventsCards','Events')">تصدير PDF</button>
+                    <div id="eventsCards"></div>
+                </section>
+
+                <!-- HSE Section -->
+                <section id="hse">
+                    <h2>ملاحظات HSE</h2>
+                    <button class="pdf-btn" onclick="exportSectionPDF('hseCards','HSE Notes')">تصدير PDF</button>
+                    <input type="text" id="hseNote" placeholder="أدخل الملاحظة">
+                    <button class="add-btn" onclick="addHSE()">إضافة</button>
+                    <div id="hseCards"></div>
+                </section>
+            </div>
+        </div>
+    </div>
+
+    <div class="toast" id="toast">تمت العملية بنجاح!</div>
+
+    <!-- ===== Scripts ===== -->
+    <script>
+        /* Toast */
+        function showToast(message) {
+            const toast = document.getElementById('toast');
+            toast.textContent = message;
+            toast.classList.add('show');
+            setTimeout(() => toast.classList.remove('show'), 3000);
+        }
+
+        /* Navigation */
+        function showSection(ev, id) {
+            document.querySelectorAll('.sidebar button').forEach(btn => btn.classList.remove('active'));
+            document.querySelectorAll('section').forEach(sec => sec.classList.remove('active'));
+            document.getElementById(id).classList.add('active');
+            ev.currentTarget.classList.add('active');
+        }
+
+        /* Dark Mode */
+        document.getElementById('darkModeToggle').addEventListener('click', () => {
+            document.body.classList.toggle('dark-mode');
+        });
+
+        /* Students */
+        let students = JSON.parse(localStorage.getItem('studentsData')) || [
+            { name: "أحمد", stage: "Proposal", deadline: "2025-12-05", supervisor: "د. علي", progress: 20 },
+            { name: "سارة", stage: "جمع البيانات", deadline: "2025-12-10", supervisor: "د. ليلى", progress: 50 }
+        ];
+
+        function renderStudents() {
+            const container = document.getElementById('studentCards');
+            container.innerHTML = '';
+            students.forEach((s, index) => {
+                const card = document.createElement('div'); card.className = 'card';
+                card.innerHTML = `<strong>${s.name}</strong> - ${s.stage}<br>موعد التسليم: ${s.deadline}<br>المشرف: ${s.supervisor}
+                    <div class="progress-bar"><div class="progress" style="width:${s.progress}%"></div></div>
+                    <button class="edit-btn" onclick="editStudent(${index})">تعديل</button>
+                    <button class="delete-btn" onclick="deleteStudent(${index})">حذف</button>`;
+                container.appendChild(card);
+            });
+        }
+
+        function addStudent() { 
+            const name = document.getElementById('studentName').value; 
+            if (!name) return showToast('يرجى إدخال اسم الطالب'); 
+            students.push({ name, stage: "Proposal", deadline: "2025-12-20", supervisor: "د. جديد", progress: 0 }); 
+            localStorage.setItem('studentsData', JSON.stringify(students)); 
+            renderStudents(); 
+            document.getElementById('studentName').value = ''; 
+            showToast('تم إضافة الطالب بنجاح!'); 
+        }
+
+        function editStudent(i) { 
+            const n = prompt("أدخل الاسم الجديد", students[i].name); 
+            if (n) { students[i].name = n; localStorage.setItem('studentsData', JSON.stringify(students)); renderStudents(); showToast('تم تعديل الطالب!'); } 
+        }
+
+        function deleteStudent(i) { 
+            if (confirm("هل أنت متأكد؟")) { students.splice(i, 1); localStorage.setItem('studentsData', JSON.stringify(students)); renderStudents(); showToast('تم حذف الطالب!'); } 
+        }
+
+        renderStudents();
+
+        /* Documents */
+        let docs = JSON.parse(localStorage.getItem('docsData')) || [];
+        function renderDocs() {
+            const container = document.getElementById('docCards');
+            const search = document.getElementById('searchDoc').value.toLowerCase();
+            container.innerHTML = '';
+            docs.filter(d => d.name.toLowerCase().includes(search)).forEach(d => {
+                const card = document.createElement('div'); card.className = 'card';
+                card.innerHTML = `<img src="file_icon.png" alt=""> ${d.name} - ${d.program}`;
+                container.appendChild(card);
+            });
+        }
+        document.getElementById('fileInput').addEventListener('change', e => {
+            const file = e.target.files[0]; 
+            const program = document.getElementById('programSelect').value;
+            if (file) { docs.push({ name: file.name, program }); localStorage.setItem('docsData', JSON.stringify(docs)); renderDocs(); showToast('تم رفع الملف بنجاح!'); }
+        });
+        document.getElementById('searchDoc').addEventListener('input', renderDocs);
+        renderDocs();
+
+        /* Events */
+        let events = [
+            { title: "ورشة HTML", date: "2025-12-01", status: "جاهز", attachment: "plan.pdf", instructor: "د. أحمد", img: "images/html.jpg" },
+            { title: "ورشة JS", date: "2025-12-05", status: "قيد التحضير", attachment: "slides.pptx", instructor: "د. سارة", img: "images/js.png" },
+            { title: "ورشة CSS", date: "2025-12-10", status: "جاهز", attachment: "style.pdf", instructor: "د. ليلى", img: "images/css.png" },
+            { title: "ورشة Python", date: "2025-12-12", status: "جاهز", attachment: "py.pdf", instructor: "بروفيسور خالد", img: "images/python.png" },
+            { title: "ورشة Database", date: "2025-12-15", status: "قيد التحضير", attachment: "db.pptx", instructor: "د. مريم", img: "images/database.png" },
+            { title: "ورشة AI", date: "2025-12-18", status: "جاهز", attachment: "ai.pdf", instructor: "د. سامي", img: "images/ai.jpg" },
+            { title: "ورشة Security", date: "2025-12-20", status: "قيد التحضير", attachment: "sec.pptx", instructor: "بروفيسور ليلى", img: "images/security.jpg" },
+            { title: "ورشة Networking", date: "2025-12-22", status: "جاهز", attachment: "net.pdf", instructor: "د. خالد", img: "images/networking.png" },
+            { title: "ورشة UI/UX", date: "2025-12-25", status: "جاهز", attachment: "ui.pdf", instructor: "د. نورة", img: "images/uiux.jpg" },
+            { title: "ورشة Cloud", date: "2025-12-28", status: "قيد التحضير", attachment: "cloud.pptx", instructor: "د. يوسف", img: "images/cloud.jpg" }
+        ];
+
+        function renderEvents() {
+            const container = document.getElementById('eventsCards');
+            container.innerHTML = '';
+            events.forEach(ev => {
+                const card = document.createElement('div');
+                card.className = 'card event-card';
+                card.innerHTML = `
+                    <img src="${ev.img}" alt="${ev.title}">
+                    <strong>${ev.title}</strong><br>
+                    <span>${ev.date}</span><br>
+                    <span class="badge ${ev.status === 'جاهز' ? 'ready' : 'preparing'}">${ev.status}</span><br>
+                    <em>${ev.instructor}</em><br>
+                    <a href="#">${ev.attachment}</a>
+                `;
+                container.appendChild(card);
+            });
+        }
+
+        renderEvents();
+
+        /* HSE */
+        let hseNotes = JSON.parse(localStorage.getItem('hseData')) || [];
+        function renderHSE() { 
+            const container = document.getElementById('hseCards'); 
+            container.innerHTML = ''; 
+            hseNotes.forEach((n, i) => { 
+                const card = document.createElement('div'); 
+                card.className = 'card'; 
+                card.innerHTML = `${n}<button class="delete-btn" onclick="deleteHSE(${i})">حذف</button>`; 
+                container.appendChild(card); 
+            }); 
+        }
+        function addHSE() { 
+            const val = document.getElementById('hseNote').value; 
+            if (!val) return showToast('يرجى إدخال الملاحظة'); 
+            hseNotes.push(val); 
+            localStorage.setItem('hseData', JSON.stringify(hseNotes)); 
+            renderHSE(); 
+            document.getElementById('hseNote').value = ''; 
+            showToast('تمت إضافة الملاحظة!'); 
+        }
+        function deleteHSE(i) { 
+            if (confirm("هل أنت متأكد؟")) { 
+                hseNotes.splice(i, 1); 
+                localStorage.setItem('hseData', JSON.stringify(hseNotes)); 
+                renderHSE(); 
+                showToast('تم حذف الملاحظة!'); 
+            } 
+        }
+        renderHSE();
+
+        /* Export PDF */
+        function exportSectionPDF(id, title) {
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF();
+            const element = document.getElementById(id);
+            doc.html(element, { callback: function (pdf) { pdf.save(title + '.pdf'); }, x: 10, y: 10, width: 180 });
+        }
+
+        /* ===== Calendar ===== */
+        const calendarContainer = document.getElementById('calendarContainer');
+        const monthYearLabel = document.getElementById('monthYear');
+        const prevBtn = document.getElementById('prevMonth');
+        const nextBtn = document.getElementById('nextMonth');
+        const popup = document.getElementById('dayEventsPopup');
+        const closePopup = document.getElementById('closePopup');
+        const popupDate = document.getElementById('popupDate');
+        const eventsList = document.getElementById('eventsList');
+
+        const daysOfWeek = ['أحد', 'اثنين', 'ثلاثاء', 'أربعاء', 'خميس', 'جمعة', 'سبت'];
+
+        let currentDate = new Date();
+
+        // بيانات الفعاليات (مثال)
+        const calendarEvents = [
+            { title: "ورشة HTML", date: "2025-12-01", status: "جاهز" },
+            { title: "ورشة JS", date: "2025-12-05", status: "قيد التحضير" },
+            { title: "ورشة CSS", date: "2025-12-10", status: "جاهز" },
+            { title: "ورشة Python", date: "2025-12-12", status: "جاهز" },
+            { title: "ورشة Database", date: "2025-12-15", status: "قيد التحضير" },
+            { title: "ورشة AI", date: "2025-12-18", status: "جاهز" },
+            { title: "ورشة Security", date: "2025-12-20", status: "قيد التحضير" }
+        ];
+
+        function renderCalendarInteractive(date) {
+            calendarContainer.innerHTML = '';
+            const year = date.getFullYear();
+            const month = date.getMonth();
+            const today = new Date();
+
+            // Header
+            monthYearLabel.textContent = `${new Intl.DateTimeFormat('ar', { month: 'long' }).format(date)} ${year}`;
+
+            // أسماء الأيام
+            daysOfWeek.forEach(day => {
+                const dayName = document.createElement('div');
+                dayName.className = 'day-name';
+                dayName.textContent = day;
+                calendarContainer.appendChild(dayName);
+            });
+
+            const firstDay = new Date(year, month, 1).getDay();
+            const daysInMonth = new Date(year, month + 1, 0).getDate();
+
+            // فراغات قبل أول يوم
+            for (let i = 0; i < firstDay; i++) {
+                const empty = document.createElement('div');
+                calendarContainer.appendChild(empty);
+            }
+
+            for (let day = 1; day <= daysInMonth; day++) {
+                const dayDiv = document.createElement('div');
+                dayDiv.className = 'day';
+                dayDiv.textContent = day;
+
+                // تمييز اليوم الحالي
+                if (day === today.getDate() && month === today.getMonth() && year === today.getFullYear()) {
+                    dayDiv.classList.add('today');
+                }
+
+                // إضافة نقاط الفعاليات
+                const dayStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+                const dayEvents = calendarEvents.filter(ev => ev.date === dayStr);
+                dayEvents.forEach(ev => {
+                    const dot = document.createElement('div');
+                    dot.className = `event-dot ${ev.status === 'جاهز' ? 'ready' : 'preparing'}`;
+                    dayDiv.appendChild(dot);
+                });
+
+                // عند الضغط على اليوم
+                dayDiv.addEventListener('click', () => {
+                    if (dayEvents.length === 0) return;
+                    popup.style.display = 'block';
+                    popupDate.textContent = `الأحداث ليوم ${day} ${new Intl.DateTimeFormat('ar', { month: 'long' }).format(date)} ${year}`;
+                    eventsList.innerHTML = '';
+                    dayEvents.forEach(ev => {
+                        const li = document.createElement('li');
+                        li.textContent = `${ev.title} - ${ev.status}`;
+                        eventsList.appendChild(li);
+                    });
+                });
+
+                calendarContainer.appendChild(dayDiv);
+            }
+        }
+
+        prevBtn.addEventListener('click', () => {
+            currentDate.setMonth(currentDate.getMonth() - 1);
+            renderCalendarInteractive(currentDate);
+        });
+
+        nextBtn.addEventListener('click', () => {
+            currentDate.setMonth(currentDate.getMonth() + 1);
+            renderCalendarInteractive(currentDate);
+        });
+
+        closePopup.addEventListener('click', () => popup.style.display = 'none');
+        window.addEventListener('click', e => { if (e.target === popup) popup.style.display = 'none'; });
+        
+        renderCalendarInteractive(currentDate);
+    </script>
+
+</body>
+</html>
